@@ -308,15 +308,15 @@
     <!-- PANTALLA TUTORIAL -->
     <div id="tutorialScreen" class="screen">
       <div class="tutorial-box">
-        <h2>Manual de Supervivencia: El Carril de Válvulas</h2>
-        <p>En este sistema siempre hay un espacio disponible para posicionar el punto decimal:</p>
+        <h2>Manual de Supervivencia: Análisis Lógico</h2>
+        <p>Para estabilizar el reactor sin trampas, recuerda analizar la magnitud:</p>
         <ul style="margin-top: 8px;">
-          <li><strong>Antes del primer dígito:</strong> Si necesitas un número decimal menor a 1 (ej. 0.05), coloca la válvula en la ranura inicial a la izquierda.</li>
-          <li><strong>Entre los dígitos:</strong> Para separar enteros de décimos, centésimos y milésimas.</li>
-          <li><strong>Al final (Número Entero):</strong> Coloca la válvula en la última ranura de la extrema derecha para indicar que el resultado es un entero puro (ej. 8.).</li>
+          <li><strong>Suma y Resta:</strong> Alinea las columnas verticalmente. El punto decimal conserva exactamente su carril.</li>
+          <li><strong>Multiplicación:</strong> Cuenta cuántos lugares decimales tienen en total los factores combinados y desplázate de derecha a izquierda.</li>
+          <li><strong>División:</strong> Si el divisor tiene decimales, amplifica ambos términos por potencias de 10 hasta dejarlo entero. Analiza el cociente paso a paso.</li>
         </ul>
       </div>
-      <button class="btn-action" onclick="startGame()">¡Comenzar Misión!</button>
+      <button class="btn-action" onclick="startGame()">¡Aceptar Reto Analítico!</button>
     </div>
 
     <!-- PANTALLA JUEGO -->
@@ -331,13 +331,13 @@
       <div class="reactor-core">
         <div id="missionInfo" class="mission-prompt">Nivel 1: Iniciación</div>
         <div id="equationDisplay" class="equation-display">14.50 + 3.25</div>
-        <div id="radarHint" class="radar-hint">Pista: Coloca la válvula en el carril exacto.</div>
+        <div id="radarHint" class="radar-hint">Reto analítico: ¿Cuál es la columna pivote?</div>
       </div>
 
       <div class="energy-track-container">
         <div style="font-size: 0.85rem; font-weight: bold; color: var(--muted);">INSERTA LA VÁLVULA DECIMAL EN EL CARRIL:</div>
         <div id="digitsRail" class="digits-rail">
-          <!-- Inyectado dinámicamente con ranura inicial, intermedia y final -->
+          <!-- Inyectado dinámicamente -->
         </div>
       </div>
 
@@ -351,25 +351,25 @@
   </div>
 
   <script>
-    // Banco con índices de ranura garantizados (0 = antes del 1er dígito, N = después del último dígito)
+    // Banco con retos de análisis lógico puro (sin spoilers en las pistas)
     const missions = {
       suma: [
-        { level: "Nivel 1: Unidades Simples", a: 14.50, b: 3.25, op: "+", raw: "1775", correct: 2, hint: "Suma en columnas fijas. El punto queda tras el segundo dígito (17.75).", expl: "¡Perfecto! Las columnas de décimos y centésimos se mantuvieron exactas." },
-        { level: "Nivel 2: Cientos y Decimales", a: 230.4, b: 15.8, op: "+", raw: "2462", correct: 3, hint: "4 décimos + 8 décimos = 12 décimos (el punto va tras el 246, o sea 246.2).", expl: "¡Impecable! El arrastre de la unidad funcionó con precisión." }
+        { level: "Nivel 1: Unidades Simples", a: 14.50, b: 3.25, op: "+", raw: "1775", correct: 2, hint: "Analiza la posición vertical: mantén la separación exacta entre las unidades y los décimos.", expl: "¡Correcto! Al sumar respetando el carril vertical, el punto se mantuvo en su posición exacta." },
+        { level: "Nivel 2: Cientos y Decimales", a: 230.4, b: 15.8, op: "+", raw: "2462", correct: 3, hint: "Analiza el arrastre: ¿Qué pasa cuando sumas los décimos (4 + 8) y superas 10?", expl: "¡Excelente análisis! Los 12 décimos generaron una unidad adicional que elevó el resultado a la escala correcta." }
       ],
       resta: [
-        { level: "Nivel 1: Estándar", a: 80.5, b: 32.1, op: "-", raw: "484", correct: 2, hint: "Conserva el eje vertical de sustracción (48.4).", expl: "¡Reactor estable! La distancia entre escalas se respetó." },
-        { level: "Nivel 2: Cientos con Ceros", a: 500.00, b: 142.75, op: "-", raw: "35725", correct: 3, hint: "Los centésimos definen la posición tras tres dígitos (357.25).", expl: "¡Dominado! Los centésimos se restaron manteniendo la escala correcta." }
+        { level: "Nivel 1: Estándar", a: 80.5, b: 32.1, op: "-", raw: "484", correct: 2, hint: "Analiza la sustracción de décimos: el eje vertical no se desplaza hacia los enteros.", expl: "¡Reactor estable! La distancia entre escalas se conservó intacta." },
+        { level: "Nivel 2: Cientos con Ceros", a: 500.00, b: 142.75, raw: "35725", correct: 3, hint: "Analiza el minuendo: desglosa los centésimos ocultos en el 500 para restar con precisión.", expl: "¡Dominado! Analizar los centésimos invisibles permitió ubicar la válvula en el sitio exacto." }
       ],
       multiplicacion: [
-        { level: "Nivel 1: Doble Decimal", a: 3.5, b: 2.1, op: "×", raw: "735", correct: 1, hint: "1 decimal + 1 decimal = 2 lugares desde la derecha (7.35).", expl: "¡Efecto crítico! Un decimal de cada factor redujo la escala en 2 posiciones." },
-        { level: "Nivel 2: Milésimas Críticas", a: 1.25, b: 0.04, op: "×", raw: "05", correct: 1, hint: "El resultado real es 0.05. Coloca la válvula antes del cero o entre ceros según la estructura.", expl: "¡Brillante! Acumulaste las posiciones de escala exacta dando 0.05." }
+        { level: "Nivel 1: Doble Decimal", a: 3.5, b: 2.1, op: "×", raw: "735", correct: 2, hint: "Analiza los factores: suma los lugares decimales de ambos (1 de 3.5 + 1 de 2.1).", expl: "¡Efecto crítico! Contar los lugares decimales de ambos factores determina cuántos espacios se desplaza el punto." },
+        { level: "Nivel 2: Milésimas Críticas", a: 1.25, b: 0.04, raw: "5", correct: 2, hint: "Analiza la escala total: 2 decimales en el primer factor y 2 en el segundo. ¿Cuántos lugares en total debes retroceder desde la derecha?", expl: "¡Brillante deducción! Cuatro lugares decimales requerían posicionar la válvula antes del 5." }
       ],
       division: [
-        { level: "Nivel 1: Cociente Entero", a: 4.8, b: 0.6, op: "÷", raw: "8", correct: 1, hint: "El resultado es 8 (entero). Coloca la válvula al final del dígito (8.) para cerrar el ciclo.", expl: "¡Impecable! Al equilibrar el flujo con potencias de 10, obtuviste un entero puro." },
-        { level: "Nivel 2: Resultado con Décimos", a: 5.2, b: 4, op: "÷", raw: "13", correct: 1, hint: "El resultado es 1.3 (la válvula va entre el 1 y el 3).", expl: "¡Excelente! Al repartir el sobrante en décimos exactos, el resultado es 1.3." },
-        { level: "Nivel 3: Centésimos Finos", a: 7.5, b: 2, op: "÷", raw: "375", correct: 1, hint: "El resultado es 3.75 (la válvula va tras el primer dígito: 3.75).", expl: "¡Gran cálculo! La división arrojó centésimos exactos: 3.75." },
-        { level: "Nivel 4: Cientos con Milésimas", a: 125.6, b: 8, op: "÷", raw: "1570", correct: 2, hint: "El resultado es 15.70 (la válvula va tras el 15).", expl: "¡Maestría absoluta! La división produjo un resultado exacto con decimales: 15.70." }
+        { level: "Nivel 1: Cociente Entero", a: 4.8, b: 0.6, op: "÷", raw: "8", correct: 1, hint: "Analiza la proporción: al amplificar ambos por 10 (48 ÷ 6), ¿sobran decimales o es un ciclo cerrado?", expl: "¡Impecable! Al equilibrar el flujo con potencias de 10, el ciclo cerró en un número entero." },
+        { level: "Nivel 2: Resultado con Décimos", a: 5.2, b: 4, op: "÷", raw: "13", correct: 1, hint: "Analiza el residuo: divide primero las unidades enteras y reparte el sobrante entre las partes.", expl: "¡Excelente! Al fraccionar el residuo en décimos, el análisis dio 1.3." },
+        { level: "Nivel 3: Centésimos Finos", a: 7.5, b: 2, op: "÷", raw: "375", correct: 1, hint: "Analiza la continuidad: tras dividir las unidades, añade ceros al residuo para buscar centésimos.", expl: "¡Gran cálculo analítico! La división llegó a centésimos exactos: 3.75." },
+        { level: "Nivel 4: Cientos con Milésimas", a: 125.6, b: 8, op: "÷", raw: "1570", correct: 2, hint: "Analiza la magnitud de los cientos: divide por bloques de valor posicional hasta cerrar la milésima.", expl: "¡Maestría absoluta! Tu razonamiento lógico mantuvo la estación a salvo." }
       ]
     };
 
@@ -412,16 +412,15 @@
       
       let opSign = mission.op;
       document.getElementById('equationDisplay').innerText = `${mission.a} ${opSign} ${mission.b}`;
-      document.getElementById('radarHint').innerText = `Pista táctica: ${mission.hint}`;
+      document.getElementById('radarHint').innerText = `Reto analítico: ${mission.hint}`;
       document.getElementById('scoreCount').innerText = score;
       document.getElementById('shieldCount').innerText = shield + '%';
 
-      // Renderizar carril garantizando ranura ANTES del primer dígito, ENTRE dígitos y DESPUÉS del último dígito
+      // Renderizar carril con ranuras garantizadas en todas las posiciones
       const rail = document.getElementById('digitsRail');
       rail.innerHTML = '';
       const digits = mission.raw.split('');
 
-      // Ranura inicial (antes del índice 0)
       const startSlot = document.createElement('div');
       startSlot.className = 'valve-slot';
       startSlot.dataset.index = 0;
@@ -434,7 +433,6 @@
         digitNode.innerText = digits[i];
         rail.appendChild(digitNode);
 
-        // Ranura tras cada dígito (índice i + 1)
         const slot = document.createElement('div');
         slot.className = 'valve-slot';
         slot.dataset.index = i + 1;
@@ -452,7 +450,7 @@
 
     function fireReactor() {
       if (selectedValve === null) {
-        alert("¡Alerta! Debes posicionar la válvula decimal en alguna de las ranuras del carril antes de disparar.");
+        alert("¡Alerta! Debes analizar la operación y posicionar la válvula decimal en alguna ranura antes de disparar.");
         return;
       }
 
@@ -472,7 +470,7 @@
         setTimeout(() => {
           levelIndex++;
           if (levelIndex >= missions[currentMode].length) {
-            alert(`¡Felicidades, Jesús! Has completado todos los niveles de ${currentMode.toUpperCase()} con una puntuación de ${score} puntos.`);
+            alert(`¡Felicidades, Jesús! Has completado todos los niveles analíticos de ${currentMode.toUpperCase()} con una puntuación de ${score} puntos.`);
             levelIndex = 0;
           }
           loadMission();
@@ -483,7 +481,7 @@
         document.getElementById('shieldCount').innerText = shield + '%';
 
         title.innerText = "💥 ¡DESBALANCE DE ESCALA!";
-        desc.innerText = `Posición de válvula incorrecta. Pista: ${mission.hint}`;
+        desc.innerText = `Posición de válvula incorrecta. Analiza de nuevo: ${mission.hint}`;
 
         if (shield <= 0) {
           alert("¡Escudos colapsados por error de escala! Reiniciando estación.");
