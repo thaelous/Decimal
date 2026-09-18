@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laboratorio Decimal - Calibrador de Escalas</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --slot-bg: rgba(56, 189, 248, 0.15);
+      --slot-active: #38bdf8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border-radius: 20px;
+      padding: 28px;
+      width: 100%;
+      max-width: 680px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Tabs de operaciones */
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 6px;
+      border-radius: 12px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #0f172a;
+    }
+
+    /* Tablero de visualización de la operación */
+    .display-box {
+      background: rgba(15, 23, 42, 0.7);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      border: 1px dashed rgba(56, 189, 248, 0.3);
+    }
+
+    .operation-view {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      line-height: 1.5;
+      text-align: right;
+      display: inline-block;
+    }
+
+    .operation-view .line {
+      border-bottom: 2px solid var(--muted);
+      margin: 4px 0 8px 0;
+    }
+
+    .guide-banner {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 10px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 6px 12px;
+      border-radius: 20px;
+    }
+
+    /* Área interactiva para ubicar el punto */
+    .placement-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .instruction {
+      font-size: 0.95rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .digits-track {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f172a;
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      user-select: none;
+      flex-wrap: wrap;
+    }
+
+    .digit-box {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #fff;
+      padding: 0 4px;
+    }
+
+    .slot {
+      width: 22px;
+      height: 48px;
+      margin: 0 2px;
+      border-radius: 6px;
+      background: var(--slot-bg);
+      border: 2px dashed rgba(56, 189, 248, 0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .slot:hover {
+      background: rgba(56, 189, 248, 0.35);
+      border-color: var(--accent);
+    }
+
+    .slot.active {
+      background: var(--accent);
+      border: 2px solid #fff;
+      box-shadow: 0 0 14px var(--accent);
+    }
+
+    .slot.active::after {
+      content: "•";
+      font-size: 2.2rem;
+      color: #0f172a;
+      line-height: 0;
+      position: absolute;
+      top: 50%;
+    }
+
+    /* Botón sin decimal */
+    .no-decimal-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--muted);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .no-decimal-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--text);
+    }
+
+    .no-decimal-btn.selected {
+      background: var(--accent);
+      color: #0f172a;
+      font-weight: 700;
+      border-color: var(--accent);
+    }
+
+    /* Controles de acción */
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    .btn-action {
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0f172a;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    /* Panel de Retroalimentación */
+    .feedback {
+      border-radius: 12px;
+      padding: 16px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.success {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid var(--success);
+    }
+
+    .feedback.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--danger);
+    }
+
+    .feedback h3 {
+      margin-bottom: 6px;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feedback.success h3 {
+      color: var(--success);
+    }
+
+    .feedback.error h3 {
+      color: var(--danger);
+    }
+
+    .feedback p {
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container { padding: 18px 14px; }
+      .digit-box { font-size: 1.6rem; }
+      .slot { width: 16px; height: 38px; }
+      .operation-view { font-size: 1.3rem; }
+      .tab-btn { font-size: 0.75rem; padding: 8px 4px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Laboratorio de Calibración Decimal</h1>
+    <p>Ajusta el orden de magnitud exacto para cada cálculo</p>
+  </header>
+
+  <main class="container">
+    <!-- Selector de Operación -->
+    <nav class="tabs">
+      <button class="tab-btn active" onclick="setOperation('suma')">Suma</button>
+      <button class="tab-btn" onclick="setOperation('resta')">Resta</button>
+      <button class="tab-btn" onclick="setOperation('multiplicacion')">Multiplicación</button>
+      <button class="tab-btn" onclick="setOperation('division')">División</button>
+    </nav>
+
+    <!-- Pizarra de la Operación -->
+    <section class="display-box">
+      <div id="operationDisplay" class="operation-view">
+        <!-- Generado dinámicamente -->
+      </div>
+      <div id="visualGuide" class="guide-banner">
+        <!-- Pistas dinámicas -->
+      </div>
+    </section>
+
+    <!-- Zona de Calibración -->
+    <section class="placement-area">
+      <p class="instruction">Haz clic en una ranura para colocar el punto decimal:</p>
+      
+      <div id="trackContainer" class="digits-track">
+        <!-- Generado dinámicamente -->
+      </div>
+
+      <button id="noDecimalBtn" class="no-decimal-btn" onclick="selectNoDecimal()">
+        El resultado es un número entero (sin punto)
+      </button>
+    </section>
+
+    <!-- Botonera -->
+    <section class="controls">
+      <button class="btn-action btn-primary" onclick="verifyPosition()">Calibrar Escala</button>
+      <button class="btn-action btn-secondary" onclick="loadNextChallenge()">Siguiente Reto</button>
+    </section>
+
+    <!-- Panel de Feedback -->
+    <section id="feedbackBox" class="feedback">
+      <h3 id="feedbackTitle"></h3>
+      <p id="feedbackText"></p>
+    </section>
+  </main>
+
+  <script>
+    // Banco de retos didácticos
+    const challenges = {
+      suma: [
+        {
+          a: "14.50",
+          b: "3.25",
+          op: "+",
+          rawDigits: "1775",
+          correctIndex: 2, // 17.75 (después de 2 dígitos)
+          explanation: "En la suma alineamos las columnas verticalmente: décimos con décimos y centésimos con centésimos. El punto mantiene su carril."
+        },
+        {
+          a: "128.4",
+          b: "12.3",
+          op: "+",
+          rawDigits: "1407",
+          correctIndex: 3, // 140.7
+          explanation: "Al sumar décimos (4 + 3 = 7), el punto decimal permanece exactamente en la misma columna de las unidades y décimos."
+        },
+        {
+          a: "0.85",
+          b: "0.15",
+          op: "+",
+          rawDigits: "100",
+          correctIndex: 1, // 1.00
+          explanation: "85 centésimos más 15 centésimos equivalen a 100 centésimos, es decir, 1 unidad completa (1.00)."
+        }
+      ],
+      resta: [
+        {
+          a: "45.8",
+          b: "12.3",
+          op: "-",
+          rawDigits: "335",
+          correctIndex: 2, // 33.5
+          explanation: "Igual que en la suma, el carril vertical del punto decimal no se mueve: las décimas se restan entre sí y las unidades entre sí."
+        },
+        {
+          a: "15.00",
+          b: "4.75",
+          op: "-",
+          rawDigits: "1025",
+          correctIndex: 2, // 10.25
+          explanation: "Para restar decimales de un número entero, visualizamos los centésimos (15.00 - 4.75 = 10.25), preservando la posición de los dos decimales."
+        }
+      ],
+      multiplicacion: [
+        {
+          a: "2.4",
+          b: "1.5",
+          op: "×",
+          rawDigits: "360",
+          correctIndex: 1, // 3.60
+          explanation: "El primer factor aporta 1 decimal y el segundo factor aporta 1 decimal. En total: 1 + 1 = 2 decimales en el producto."
+        },
+        {
+          a: "12.2",
+          b: "0.3",
+          op: "×",
+          rawDigits: "366",
+          correctIndex: 1, // 3.66
+          explanation: "12.2 (1 decimal) y 0.3 (1 decimal) suman 2 cifras decimales. Por tanto, contamos 2 lugares de derecha a izquierda: 3.66."
+        },
+        {
+          a: "0.12",
+          b: "0.4",
+          op: "×",
+          rawDigits: "0048",
+          correctIndex: 1, // 0.048
+          explanation: "0.12 tiene 2 decimales y 0.4 tiene 1 decimal. Total: 3 decimales. Contamos 3 lugares desde la derecha, lo que da 0.048."
+        }
+      ],
+      division: [
+        {
+          a: "4.8",
+          b: "0.6",
+          op: "÷",
+          rawDigits: "8",
+          correctIndex: -1, // Entero: 8
+          explanation: "Al multiplicar dividendo y divisor por 10 para quitar el punto del divisor, calculamos 48 ÷ 6 = 8 (un entero sin decimal)."
+        },
+        {
+          a: "7.5",
+          b: "2.5",
+          op: "÷",
+          rawDigits: "3",
+          correctIndex: -1, // Entero: 3
+          explanation: "¿Cuántas veces cabe 2.5 en 7.5? Cabe exactamente 3 veces enteras."
+        },
+        {
+          a: "14.4",
+          b: "1.2",
+          op: "÷",
+          rawDigits: "12",
+          correctIndex: -1, // Entero: 12
+          explanation: "Multiplicamos ambos por 10 para transformar la operación en 144 ÷ 12, resultando en 12 unidades enteras."
+        },
+        {
+          a: "1.25",
+          b: "5",
+          op: "÷",
+          rawDigits: "025",
+          correctIndex: 1, // 0.25
+          explanation: "Al dividir entre un entero (5), el punto del cociente sube en línea directa con el punto del dividendo: 1.25 ÷ 5 = 0.25."
+        }
+      ]
+    };
+
+    let currentOp = 'suma';
+    let currentIndex = 0;
+    let selectedSlot = null; // Índice de la ranura seleccionada (o -1 si es entero)
+
+    function setOperation(op) {
+      currentOp = op;
+      currentIndex = 0;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(op.slice(0, 4)));
+      });
+      loadChallenge();
+    }
+
+    function loadChallenge() {
+      const challenge = challenges[currentOp][currentIndex];
+      selectedSlot = null;
+      document.getElementById('feedbackBox').className = 'feedback';
+      document.getElementById('noDecimalBtn').classList.remove('selected');
+
+      // Actualizar vista de la operación
+      const opDisplay = document.getElementById('operationDisplay');
+      if (currentOp === 'suma' || currentOp === 'resta') {
+        opDisplay.innerHTML = `
+          <div>&nbsp;${challenge.a}</div>
+          <div>${challenge.op}&nbsp;${challenge.b}</div>
+          <div class="line"></div>
+          <div style="color: var(--muted); font-size: 1.1rem; letter-spacing: 4px;">? ? ? ?</div>
+        `;
+        document.getElementById('visualGuide').innerText = "Regla de Oro: Mantén el carril vertical del punto alineado.";
+      } else if (currentOp === 'multiplicacion') {
+        opDisplay.innerHTML = `
+          <div>${challenge.a}</div>
+          <div>× ${challenge.b}</div>
+          <div class="line"></div>
+          <div style="color: var(--muted); font-size: 1.1rem; letter-spacing: 4px;">? ? ? ?</div>
+        `;
+        document.getElementById('visualGuide').innerText = "Regla de Oro: Suma la cantidad de decimales de ambos factores.";
+      } else {
+        opDisplay.innerHTML = `
+          <div>${challenge.a} ${challenge.op} ${challenge.b}</div>
+        `;
+        document.getElementById('visualGuide').innerText = "Regla de Oro: Convierte el divisor en un entero amplificando por 10, 100...";
+      }
+
+      // Renderizar dígitos crudos y ranuras para el punto
+      const track = document.getElementById('trackContainer');
+      track.innerHTML = '';
+
+      const digits = challenge.rawDigits.split('');
+      for (let i = 0; i < digits.length; i++) {
+        // Ranura antes o entre dígitos (ranura i está tras i dígitos)
+        if (i > 0) {
+          const slot = document.createElement('div');
+          slot.className = 'slot';
+          slot.dataset.index = i;
+          slot.onclick = () => selectSlot(i);
+          track.appendChild(slot);
+        }
+
+        const digit = document.createElement('div');
+        digit.className = 'digit-box';
+        digit.innerText = digits[i];
+        track.appendChild(digit);
+      }
+    }
+
+    function selectSlot(index) {
+      selectedSlot = index;
+      document.getElementById('noDecimalBtn').classList.remove('selected');
+      document.querySelectorAll('.slot').forEach(slot => {
+        slot.classList.toggle('active', parseInt(slot.dataset.index) === index);
+      });
+    }
+
+    function selectNoDecimal() {
+      selectedSlot = -1; // Representa que el resultado es entero
+      document.getElementById('noDecimalBtn').classList.add('selected');
+      document.querySelectorAll('.slot').forEach(slot => slot.classList.remove('active'));
+    }
+
+    function verifyPosition() {
+      if (selectedSlot === null) {
+        alert("Por favor elige una posición para el punto decimal o marca si es entero.");
+        return;
+      }
+
+      const challenge = challenges[currentOp][currentIndex];
+      const feedbackBox = document.getElementById('feedbackBox');
+      const title = document.getElementById('feedbackTitle');
+      const text = document.getElementById('feedbackText');
+
+      feedbackBox.classList.remove('success', 'error');
+
+      if (selectedSlot === challenge.correctIndex) {
+        feedbackBox.classList.add('show', 'success');
+        title.innerText = "¡Escala calibrada a la perfección!";
+        text.innerText = challenge.explanation;
+      } else {
+        feedbackBox.classList.add('show', 'error');
+        
+        let magnitudeDiff = "";
+        if (selectedSlot !== -1 && challenge.correctIndex !== -1) {
+          const diff = selectedSlot - challenge.correctIndex;
+          if (diff > 0) {
+            magnitudeDiff = ` Tu respuesta es ${Math.pow(10, diff)} veces mayor de lo que debería ser.`;
+          } else {
+            magnitudeDiff = ` Tu respuesta es ${Math.pow(10, Math.abs(diff))} veces menor de lo que debería ser.`;
+          }
+        }
+
+        title.innerText = "Desbalance de Magnitud detectado";
+        text.innerText = `Posición incorrecta.${magnitudeDiff} Recuerda: ${challenge.explanation}`;
+      }
+    }
+
+    function loadNextChallenge() {
+      currentIndex = (currentIndex + 1) % challenges[currentOp].length;
+      loadChallenge();
+    }
+
+    // Inicialización
+    loadChallenge();
+  </script>
+</body>
+</html>
