@@ -3,26 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Laboratorio Decimal - Calibrador de Escalas</title>
+  <title>Sifón de Magnitudes - Laboratorio Decimal Didáctico</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --accent: #38bdf8;
-      --accent-hover: #0ea5e9;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --slot-bg: rgba(56, 189, 248, 0.15);
-      --slot-active: #38bdf8;
+      --bg: #090d16;
+      --card-bg: #131b2e;
+      --accent: #00f0ff;
+      --accent-glow: rgba(0, 240, 255, 0.4);
+      --secondary: #7000ff;
+      --success: #00ff66;
+      --danger: #ff0055;
+      --text: #f0f4f8;
+      --muted: #8b9bb4;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
 
     body {
@@ -32,149 +31,216 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px;
+      padding: 20px 16px;
+      overflow-x: hidden;
     }
 
     header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
     }
 
     h1 {
-      font-size: 1.9rem;
-      font-weight: 800;
+      font-size: 1.8rem;
+      font-weight: 900;
       color: var(--accent);
-      letter-spacing: 0.5px;
+      text-shadow: 0 0 15px var(--accent-glow);
+      letter-spacing: 1px;
     }
 
     header p {
       color: var(--muted);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       margin-top: 4px;
     }
 
     .container {
       background-color: var(--card-bg);
-      border-radius: 20px;
-      padding: 28px;
+      border-radius: 24px;
+      padding: 24px;
       width: 100%;
-      max-width: 680px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      max-width: 720px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.2);
       display: flex;
       flex-direction: column;
       gap: 20px;
+      position: relative;
     }
 
-    /* Tabs de operaciones */
+    /* Pestañas de Operaciones */
     .tabs {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      background: rgba(15, 23, 42, 0.6);
+      gap: 6px;
+      background: rgba(9, 13, 22, 0.8);
       padding: 6px;
-      border-radius: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .tab-btn {
       background: transparent;
       border: none;
       color: var(--muted);
-      padding: 10px;
+      padding: 10px 4px;
       font-weight: 700;
-      font-size: 0.9rem;
-      border-radius: 8px;
+      font-size: 0.85rem;
+      border-radius: 10px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
+      text-align: center;
     }
 
     .tab-btn:hover {
       color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
     }
 
     .tab-btn.active {
       background: var(--accent);
-      color: #0f172a;
+      color: #090d16;
+      box-shadow: 0 0 15px var(--accent-glow);
     }
 
-    /* Tablero de visualización de la operación */
-    .display-box {
-      background: rgba(15, 23, 42, 0.7);
-      border-radius: 14px;
+    /* HUD Superior de Nivel y Puntuación */
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px 14px;
+      border-radius: 10px;
+    }
+
+    .hud span strong {
+      color: var(--accent);
+    }
+
+    /* Área Visual del Reto (Laboratorio) */
+    .lab-stage {
+      background: linear-gradient(135deg, rgba(9, 13, 22, 0.9), rgba(19, 27, 46, 0.9));
+      border-radius: 16px;
       padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       overflow: hidden;
-      border: 1px dashed rgba(56, 189, 248, 0.3);
     }
 
-    .operation-view {
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 1.8rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      line-height: 1.5;
-      text-align: right;
-      display: inline-block;
+    .lab-stage::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
     }
 
-    .operation-view .line {
-      border-bottom: 2px solid var(--muted);
-      margin: 4px 0 8px 0;
-    }
-
-    .guide-banner {
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-top: 10px;
-      text-align: center;
-      background: rgba(255, 255, 255, 0.04);
-      padding: 6px 12px;
-      border-radius: 20px;
-    }
-
-    /* Área interactiva para ubicar el punto */
-    .placement-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .instruction {
-      font-size: 0.95rem;
-      color: var(--text);
-      font-weight: 600;
-    }
-
-    .digits-track {
+    /* Contenedor Visualizador del Problema */
+    .problem-visual {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0f172a;
-      padding: 14px 20px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      user-select: none;
-      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 15px;
+      width: 100%;
     }
 
-    .digit-box {
-      font-size: 2.2rem;
+    .fluid-vessel {
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(0, 240, 255, 0.3);
+      border-radius: 12px;
+      padding: 12px 20px;
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .vessel-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .vessel-value {
+      font-size: 1.5rem;
       font-weight: 800;
       color: #fff;
-      padding: 0 4px;
+      font-family: 'Courier New', monospace;
     }
 
-    .slot {
-      width: 22px;
-      height: 48px;
-      margin: 0 2px;
-      border-radius: 6px;
-      background: var(--slot-bg);
-      border: 2px dashed rgba(56, 189, 248, 0.4);
+    .operator-symbol {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--accent);
+    }
+
+    .pedagogical-hint {
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-align: center;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      max-width: 90%;
+    }
+
+    /* Carril de Precisión Cuántica (Láser de Puntos) */
+    .calibration-deck {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .deck-instruction {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+    }
+
+    .laser-track {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #060910;
+      padding: 16px 24px;
+      border-radius: 14px;
+      border: 2px solid rgba(0, 240, 255, 0.2);
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+      position: relative;
+      flex-wrap: wrap;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    .digit-node {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #ffffff;
+      font-family: 'Courier New', monospace;
+      padding: 0 2px;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .quantum-port {
+      width: 24px;
+      height: 52px;
+      margin: 0 3px;
+      border-radius: 8px;
+      background: rgba(0, 240, 255, 0.1);
+      border: 2px dashed rgba(0, 240, 255, 0.4);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -183,156 +249,160 @@
       transition: all 0.2s ease;
     }
 
-    .slot:hover {
-      background: rgba(56, 189, 248, 0.35);
+    .quantum-port:hover {
+      background: rgba(0, 240, 255, 0.3);
       border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
     }
 
-    .slot.active {
+    .quantum-port.active {
       background: var(--accent);
       border: 2px solid #fff;
-      box-shadow: 0 0 14px var(--accent);
+      box-shadow: 0 0 20px var(--accent), inset 0 0 5px #000;
     }
 
-    .slot.active::after {
+    .quantum-port.active::after {
       content: "•";
-      font-size: 2.2rem;
-      color: #0f172a;
+      font-size: 2.4rem;
+      color: #090d16;
       line-height: 0;
       position: absolute;
-      top: 50%;
+      top: 52%;
     }
 
-    /* Botón sin decimal */
-    .no-decimal-btn {
-      background: rgba(255, 255, 255, 0.08);
+    /* Botón Entero */
+    .integer-mode-btn {
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.15);
       color: var(--muted);
-      padding: 8px 14px;
-      border-radius: 8px;
+      padding: 8px 16px;
+      border-radius: 10px;
       font-size: 0.85rem;
       cursor: pointer;
       font-weight: 600;
       transition: all 0.2s;
     }
 
-    .no-decimal-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
-      color: var(--text);
-    }
-
-    .no-decimal-btn.selected {
-      background: var(--accent);
-      color: #0f172a;
-      font-weight: 700;
-      border-color: var(--accent);
-    }
-
-    /* Controles de acción */
-    .controls {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin-top: 6px;
-    }
-
-    .btn-action {
-      padding: 12px 24px;
-      font-size: 1rem;
-      font-weight: 700;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #0f172a;
-    }
-
-    .btn-primary:hover {
-      background: var(--accent-hover);
-      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
-    }
-
-    .btn-secondary {
+    .integer-mode-btn:hover {
       background: rgba(255, 255, 255, 0.1);
       color: var(--text);
     }
 
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.18);
+    .integer-mode-btn.selected {
+      background: var(--accent);
+      color: #090d16;
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
     }
 
-    /* Panel de Retroalimentación */
-    .feedback {
+    /* Controles de Acción */
+    .action-controls {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-cyber {
+      padding: 14px 28px;
+      font-size: 1rem;
+      font-weight: 800;
       border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-fire {
+      background: var(--accent);
+      color: #090d16;
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .btn-fire:hover {
+      background: #33f3ff;
+      box-shadow: 0 6px 25px var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .btn-next {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-next:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Consola de Diagnóstico (Feedback) */
+    .diagnostic-console {
+      border-radius: 14px;
       padding: 16px;
       display: none;
-      animation: fadeIn 0.3s ease;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 1px solid;
     }
 
-    .feedback.show {
+    .diagnostic-console.show {
       display: block;
     }
 
-    .feedback.success {
-      background: rgba(34, 197, 94, 0.15);
-      border: 1px solid var(--success);
+    .diagnostic-console.success {
+      background: rgba(0, 255, 102, 0.1);
+      border-color: var(--success);
+      box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
     }
 
-    .feedback.error {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid var(--danger);
+    .diagnostic-console.error {
+      background: rgba(255, 0, 85, 0.1);
+      border-color: var(--danger);
+      box-shadow: 0 0 20px rgba(255, 0, 85, 0.2);
     }
 
-    .feedback h3 {
+    .diagnostic-console h3 {
+      font-size: 1.05rem;
       margin-bottom: 6px;
-      font-size: 1.1rem;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .feedback.success h3 {
-      color: var(--success);
-    }
+    .diagnostic-console.success h3 { color: var(--success); }
+    .diagnostic-console.error h3 { color: var(--danger); }
 
-    .feedback.error h3 {
-      color: var(--danger);
-    }
-
-    .feedback p {
-      font-size: 0.95rem;
-      line-height: 1.4;
+    .diagnostic-console p {
+      font-size: 0.9rem;
+      line-height: 1.5;
       color: var(--text);
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     /* Responsive */
     @media (max-width: 480px) {
-      .container { padding: 18px 14px; }
-      .digit-box { font-size: 1.6rem; }
-      .slot { width: 16px; height: 38px; }
-      .operation-view { font-size: 1.3rem; }
-      .tab-btn { font-size: 0.75rem; padding: 8px 4px; }
+      .container { padding: 16px 12px; }
+      .digit-node { font-size: 1.7rem; }
+      .quantum-port { width: 18px; height: 40px; }
+      .vessel-value { font-size: 1.2rem; }
+      .tab-btn { font-size: 0.75rem; padding: 8px 2px; }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Laboratorio de Calibración Decimal</h1>
-    <p>Ajusta el orden de magnitud exacto para cada cálculo</p>
+    <h1>Sifón de Magnitudes</h1>
+    <p>Laboratorio interactivo de precisión decimal</p>
   </header>
 
   <main class="container">
-    <!-- Selector de Operación -->
+    <!-- Navegación de Operaciones -->
     <nav class="tabs">
       <button class="tab-btn active" onclick="setOperation('suma')">Suma</button>
       <button class="tab-btn" onclick="setOperation('resta')">Resta</button>
@@ -340,113 +410,105 @@
       <button class="tab-btn" onclick="setOperation('division')">División</button>
     </nav>
 
-    <!-- Pizarra de la Operación -->
-    <section class="display-box">
-      <div id="operationDisplay" class="operation-view">
-        <!-- Generado dinámicamente -->
+    <!-- Panel de Estado (HUD) -->
+    <section class="hud">
+      <span>Nivel: <strong id="levelIndicator">1 / 3</strong></span>
+      <span>Puntos de Calibración: <strong id="scoreIndicator">0</strong></span>
+    </section>
+
+    <!-- Escenario del Laboratorio -->
+    <section class="lab-stage">
+      <div id="problemVisual" class="problem-visual">
+        <!-- Renderizado dinámico del tanque / visualización -->
       </div>
-      <div id="visualGuide" class="guide-banner">
-        <!-- Pistas dinámicas -->
+      <div id="pedagogicalHint" class="pedagogical-hint">
+        Cargando directiva de calibración...
       </div>
     </section>
 
-    <!-- Zona de Calibración -->
-    <section class="placement-area">
-      <p class="instruction">Haz clic en una ranura para colocar el punto decimal:</p>
+    <!-- Deck de Calibración Cuántica -->
+    <section class="calibration-deck">
+      <div class="deck-instruction">Dispara el láser y posiciona el punto decimal exactamente:</div>
       
-      <div id="trackContainer" class="digits-track">
-        <!-- Generado dinámicamente -->
+      <div id="laserTrack" class="laser-track">
+        <!-- Nodos y puertos de puntos inyectados por JS -->
       </div>
 
-      <button id="noDecimalBtn" class="no-decimal-btn" onclick="selectNoDecimal()">
-        El resultado es un número entero (sin punto)
+      <button id="integerBtn" class="integer-mode-btn" onclick="selectIntegerResult()">
+        Resultado Entero Puro (Sin Punto Decimal)
       </button>
     </section>
 
-    <!-- Botonera -->
-    <section class="controls">
-      <button class="btn-action btn-primary" onclick="verifyPosition()">Calibrar Escala</button>
-      <button class="btn-action btn-secondary" onclick="loadNextChallenge()">Siguiente Reto</button>
+    <!-- Controles -->
+    <section class="action-controls">
+      <button class="btn-cyber btn-fire" onclick="verifyCalibration()">Sintonizar Escala</button>
+      <button class="btn-cyber btn-next" onclick="nextChallenge()">Siguiente Sifón</button>
     </section>
 
-    <!-- Panel de Feedback -->
-    <section id="feedbackBox" class="feedback">
-      <h3 id="feedbackTitle"></h3>
-      <p id="feedbackText"></p>
+    <!-- Consola de Diagnóstico -->
+    <section id="diagnosticConsole" class="diagnostic-console">
+      <h3 id="consoleTitle"></h3>
+      <p id="consoleText"></p>
     </section>
   </main>
 
   <script>
-    // Banco de retos didácticos
-    const challenges = {
+    // Banco de retos rediseñado con enfoque 100% pedagógico y visual
+    const challengesData = {
       suma: [
         {
-          a: "14.50",
-          b: "3.25",
+          a: "24.60",
+          b: "12.35",
           op: "+",
-          rawDigits: "1775",
-          correctIndex: 2, // 17.75 (después de 2 dígitos)
-          explanation: "En la suma alineamos las columnas verticalmente: décimos con décimos y centésimos con centésimos. El punto mantiene su carril."
+          raw: "3695",
+          correctIdx: 2, // 36.95
+          hint: "Suma en columnas simétricas: décimos con décimos, centésimos con centésimos. El punto permanece inamovible en su eje.",
+          explanation: "Excelente. Al sumar unidades con unidades y décimos con décimos, el punto decimal actúa como el pivote central que no cambia de columna."
         },
         {
-          a: "128.4",
-          b: "12.3",
+          a: "105.8",
+          b: "9.2",
           op: "+",
-          rawDigits: "1407",
-          correctIndex: 3, // 140.7
-          explanation: "Al sumar décimos (4 + 3 = 7), el punto decimal permanece exactamente en la misma columna de las unidades y décimos."
-        },
-        {
-          a: "0.85",
-          b: "0.15",
-          op: "+",
-          rawDigits: "100",
-          correctIndex: 1, // 1.00
-          explanation: "85 centésimos más 15 centésimos equivalen a 100 centésimos, es decir, 1 unidad completa (1.00)."
+          raw: "1150",
+          correctIdx: 3, // 115.0
+          explanation: "¡Preciso! 8 décimos + 2 décimos dan 10 décimos (1 entero completo que sube a las unidades, resultando en 115.0)."
         }
       ],
       resta: [
         {
-          a: "45.8",
-          b: "12.3",
+          a: "80.5",
+          b: "32.1",
           op: "-",
-          rawDigits: "335",
-          correctIndex: 2, // 33.5
-          explanation: "Igual que en la suma, el carril vertical del punto decimal no se mueve: las décimas se restan entre sí y las unidades entre sí."
+          raw: "484",
+          correctIdx: 2, // 48.4
+          explanation: "¡Correcto! La alineación vertical se respeta estrictamente en la sustracción de magnitudes de igual escala."
         },
         {
-          a: "15.00",
-          b: "4.75",
+          a: "50.00",
+          b: "14.25",
           op: "-",
-          rawDigits: "1025",
-          correctIndex: 2, // 10.25
-          explanation: "Para restar decimales de un número entero, visualizamos los centésimos (15.00 - 4.75 = 10.25), preservando la posición de los dos decimales."
+          raw: "3575",
+          correctIdx: 2, // 35.75
+          explanation: "¡Dominado! Visualizar el entero como .00 permite sustraer centésimos exactos manteniendo la escala original."
         }
       ],
       multiplicacion: [
         {
-          a: "2.4",
-          b: "1.5",
+          a: "3.5",
+          b: "2.1",
           op: "×",
-          rawDigits: "360",
-          correctIndex: 1, // 3.60
-          explanation: "El primer factor aporta 1 decimal y el segundo factor aporta 1 decimal. En total: 1 + 1 = 2 decimales en el producto."
+          raw: "735",
+          correctIdx: 1, // 7.35
+          hint: "Regla del Área: 3.5 aporta 1 decimal y 2.1 aporta 1 decimal. Suma las escalas de ambos factores (1 + 1 = 2).",
+          explanation: "¡Magia geométrica! Al multiplicar factores con decimales, encoges la escala combinando sus lugares decimales (1 + 1 = 2 posiciones desde la derecha)."
         },
         {
-          a: "12.2",
-          b: "0.3",
-          op: "×",
-          rawDigits: "366",
-          correctIndex: 1, // 3.66
-          explanation: "12.2 (1 decimal) y 0.3 (1 decimal) suman 2 cifras decimales. Por tanto, contamos 2 lugares de derecha a izquierda: 3.66."
-        },
-        {
-          a: "0.12",
+          a: "0.25",
           b: "0.4",
           op: "×",
-          rawDigits: "0048",
-          correctIndex: 1, // 0.048
-          explanation: "0.12 tiene 2 decimales y 0.4 tiene 1 decimal. Total: 3 decimales. Contamos 3 lugares desde la derecha, lo que da 0.048."
+          raw: "0100",
+          correctIdx: 1, // 0.100 (o 0.1)
+          explanation: "¡Impecable! 0.25 (2 decimales) por 0.4 (1 decimal) acumula 3 lugares de reducción de escala, ubicando el punto en 0.100."
         }
       ],
       division: [
@@ -454,44 +516,40 @@
           a: "4.8",
           b: "0.6",
           op: "÷",
-          rawDigits: "8",
-          correctIndex: -1, // Entero: 8
-          explanation: "Al multiplicar dividendo y divisor por 10 para quitar el punto del divisor, calculamos 48 ÷ 6 = 8 (un entero sin decimal)."
+          raw: "8",
+          correctIdx: -1, // Entero 8
+          hint: "El Secreto de la División: Multiplica ambos lados por 10 para eliminar los decimales del divisor sin alterar el cociente (48 ÷ 6).",
+          explanation: "¡Explicación clave! Al amplificar tanto el dividendo (4.8 → 48) como el divisor (0.6 → 6) por 10, mantienes la proporción intacta. El resultado es un número entero exacto: 8."
         },
         {
-          a: "7.5",
-          b: "2.5",
+          a: "1.5",
+          b: "0.25",
           op: "÷",
-          rawDigits: "3",
-          correctIndex: -1, // Entero: 3
-          explanation: "¿Cuántas veces cabe 2.5 en 7.5? Cabe exactamente 3 veces enteras."
+          raw: "6",
+          correctIdx: -1, // Entero 6
+          hint: "Amplifica ambos por 100 para limpiar el divisor (0.25 × 100 = 25 y 1.5 × 100 = 150). Calcula 150 ÷ 25.",
+          explanation: "¡Brillante! Al escalar ambos términos por 100, transformaste el problema en 150 ÷ 25, descubriendo que cabe exactamente 6 veces enteras."
         },
         {
-          a: "14.4",
-          b: "1.2",
+          a: "3.2",
+          b: "4",
           op: "÷",
-          rawDigits: "12",
-          correctIndex: -1, // Entero: 12
-          explanation: "Multiplicamos ambos por 10 para transformar la operación en 144 ÷ 12, resultando en 12 unidades enteras."
-        },
-        {
-          a: "1.25",
-          b: "5",
-          op: "÷",
-          rawDigits: "025",
-          correctIndex: 1, // 0.25
-          explanation: "Al dividir entre un entero (5), el punto del cociente sube en línea directa con el punto del dividendo: 1.25 ÷ 5 = 0.25."
+          raw: "08",
+          correctIdx: 1, // 0.8
+          hint: "Cuando el divisor es un entero puro (4), el punto del dividendo sube en línea vertical recta al cociente.",
+          explanation: "¡Correcto! Al dividir una magnitud decimal entre un número entero de personas o partes, el punto decimal asciende de forma vertical directa al marcador: 0.8."
         }
       ]
     };
 
-    let currentOp = 'suma';
-    let currentIndex = 0;
-    let selectedSlot = null; // Índice de la ranura seleccionada (o -1 si es entero)
+    let activeOp = 'suma';
+    let currentLevel = 0;
+    let score = 0;
+    let chosenPort = null; // null = no seleccionado, -1 = entero, >0 = índice del puerto
 
     function setOperation(op) {
-      currentOp = op;
-      currentIndex = 0;
+      activeOp = op;
+      currentLevel = 0;
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.textContent.toLowerCase().includes(op.slice(0, 4)));
       });
@@ -499,113 +557,131 @@
     }
 
     function loadChallenge() {
-      const challenge = challenges[currentOp][currentIndex];
-      selectedSlot = null;
-      document.getElementById('feedbackBox').className = 'feedback';
-      document.getElementById('noDecimalBtn').classList.remove('selected');
+      const data = challengesData[activeOp][currentLevel];
+      chosenPort = null;
+      document.getElementById('diagnosticConsole').className = 'diagnostic-console';
+      document.getElementById('integerBtn').classList.remove('selected');
+      document.getElementById('levelIndicator').innerText = `${currentLevel + 1} / ${challengesData[activeOp].length}`;
+      document.getElementById('scoreIndicator').innerText = score;
 
-      // Actualizar vista de la operación
-      const opDisplay = document.getElementById('operationDisplay');
-      if (currentOp === 'suma' || currentOp === 'resta') {
-        opDisplay.innerHTML = `
-          <div>&nbsp;${challenge.a}</div>
-          <div>${challenge.op}&nbsp;${challenge.b}</div>
-          <div class="line"></div>
-          <div style="color: var(--muted); font-size: 1.1rem; letter-spacing: 4px;">? ? ? ?</div>
+      // Renderizar visualizador del problema de manera atractiva
+      const problemVisual = document.getElementById('problemVisual');
+      if (activeOp === 'suma' || activeOp === 'resta') {
+        problemVisual.innerHTML = `
+          <div class="fluid-vessel">
+            <div class="vessel-label">Magnitud A</div>
+            <div class="vessel-value">${data.a}</div>
+          </div>
+          <div class="operator-symbol">${data.op}</div>
+          <div class="fluid-vessel">
+            <div class="vessel-label">Magnitud B</div>
+            <div class="vessel-value">${data.b}</div>
+          </div>
         `;
-        document.getElementById('visualGuide').innerText = "Regla de Oro: Mantén el carril vertical del punto alineado.";
-      } else if (currentOp === 'multiplicacion') {
-        opDisplay.innerHTML = `
-          <div>${challenge.a}</div>
-          <div>× ${challenge.b}</div>
-          <div class="line"></div>
-          <div style="color: var(--muted); font-size: 1.1rem; letter-spacing: 4px;">? ? ? ?</div>
+      } else if (activeOp === 'multiplicacion') {
+        problemVisual.innerHTML = `
+          <div class="fluid-vessel">
+            <div class="vessel-label">Factor 1</div>
+            <div class="vessel-value">${data.a}</div>
+          </div>
+          <div class="operator-symbol">×</div>
+          <div class="fluid-vessel">
+            <div class="vessel-label">Factor 2</div>
+            <div class="vessel-value">${data.b}</div>
+          </div>
         `;
-        document.getElementById('visualGuide').innerText = "Regla de Oro: Suma la cantidad de decimales de ambos factores.";
       } else {
-        opDisplay.innerHTML = `
-          <div>${challenge.a} ${challenge.op} ${challenge.b}</div>
+        problemVisual.innerHTML = `
+          <div class="fluid-vessel" style="min-width: 200px;">
+            <div class="vessel-label">Flujo de División</div>
+            <div class="vessel-value">${data.a} ÷ ${data.b}</div>
+          </div>
         `;
-        document.getElementById('visualGuide').innerText = "Regla de Oro: Convierte el divisor en un entero amplificando por 10, 100...";
       }
 
-      // Renderizar dígitos crudos y ranuras para el punto
-      const track = document.getElementById('trackContainer');
-      track.innerHTML = '';
+      // Pista pedagógica
+      document.getElementById('pedagogicalHint').innerText = data.hint || "Alinea correctamente los factores de escala para evitar un colapso numérico.";
 
-      const digits = challenge.rawDigits.split('');
+      // Renderizar carril láser y puertos cuánticos
+      const laserTrack = document.getElementById('laserTrack');
+      laserTrack.innerHTML = '';
+      const digits = data.raw.split('');
+
       for (let i = 0; i < digits.length; i++) {
-        // Ranura antes o entre dígitos (ranura i está tras i dígitos)
         if (i > 0) {
-          const slot = document.createElement('div');
-          slot.className = 'slot';
-          slot.dataset.index = i;
-          slot.onclick = () => selectSlot(i);
-          track.appendChild(slot);
+          const port = document.createElement('div');
+          port.className = 'quantum-port';
+          port.dataset.index = i;
+          port.onclick = () => selectPort(i);
+          laserTrack.appendChild(port);
         }
-
-        const digit = document.createElement('div');
-        digit.className = 'digit-box';
-        digit.innerText = digits[i];
-        track.appendChild(digit);
+        const node = document.createElement('div');
+        node.className = 'digit-node';
+        node.innerText = digits[i];
+        laserTrack.appendChild(node);
       }
     }
 
-    function selectSlot(index) {
-      selectedSlot = index;
-      document.getElementById('noDecimalBtn').classList.remove('selected');
-      document.querySelectorAll('.slot').forEach(slot => {
-        slot.classList.toggle('active', parseInt(slot.dataset.index) === index);
+    function selectPort(index) {
+      chosenPort = index;
+      document.getElementById('integerBtn').classList.remove('selected');
+      document.querySelectorAll('.quantum-port').forEach(p => {
+        p.classList.toggle('active', parseInt(p.dataset.index) === index);
       });
     }
 
-    function selectNoDecimal() {
-      selectedSlot = -1; // Representa que el resultado es entero
-      document.getElementById('noDecimalBtn').classList.add('selected');
-      document.querySelectorAll('.slot').forEach(slot => slot.classList.remove('active'));
+    function selectIntegerResult() {
+      chosenPort = -1;
+      document.getElementById('integerBtn').classList.add('selected');
+      document.querySelectorAll('.quantum-port').forEach(p => p.classList.remove('active'));
     }
 
-    function verifyPosition() {
-      if (selectedSlot === null) {
-        alert("Por favor elige una posición para el punto decimal o marca si es entero.");
+    function verifyCalibration() {
+      if (chosenPort === null) {
+        alert("¡Atención! Debes disparar el láser seleccionando una ranura para el punto decimal o marcar el resultado como entero.");
         return;
       }
 
-      const challenge = challenges[currentOp][currentIndex];
-      const feedbackBox = document.getElementById('feedbackBox');
-      const title = document.getElementById('feedbackTitle');
-      const text = document.getElementById('feedbackText');
+      const data = challengesData[activeOp][currentLevel];
+      const consoleBox = document.getElementById('diagnosticConsole');
+      const title = document.getElementById('consoleTitle');
+      const text = document.getElementById('consoleText');
 
-      feedbackBox.classList.remove('success', 'error');
+      consoleBox.classList.remove('success', 'error');
 
-      if (selectedSlot === challenge.correctIndex) {
-        feedbackBox.classList.add('show', 'success');
-        title.innerText = "¡Escala calibrada a la perfección!";
-        text.innerText = challenge.explanation;
+      if (chosenPort === data.correctIdx) {
+        consoleBox.classList.add('show', 'success');
+        title.innerText = "¡Calibración Cuántica Exitosa!";
+        text.innerText = data.explanation;
+        score += 150;
+        document.getElementById('scoreIndicator').innerText = score;
       } else {
-        feedbackBox.classList.add('show', 'error');
+        consoleBox.classList.add('show', 'error');
         
-        let magnitudeDiff = "";
-        if (selectedSlot !== -1 && challenge.correctIndex !== -1) {
-          const diff = selectedSlot - challenge.correctIndex;
-          if (diff > 0) {
-            magnitudeDiff = ` Tu respuesta es ${Math.pow(10, diff)} veces mayor de lo que debería ser.`;
-          } else {
-            magnitudeDiff = ` Tu respuesta es ${Math.pow(10, Math.abs(diff))} veces menor de lo que debería ser.`;
-          }
+        let feedbackFactor = "";
+        if (chosenPort !== -1 && data.correctIdx !== -1) {
+          const diff = chosenPort - data.correctIdx;
+          const factor = Math.pow(10, Math.abs(diff));
+          feedbackFactor = diff > 0 
+            ? ` El resultado quedó ${factor} veces más grande (desplazado a la derecha).` 
+            : ` El resultado quedó ${factor} veces más pequeño (desplazado a la izquierda).`;
         }
 
-        title.innerText = "Desbalance de Magnitud detectado";
-        text.innerText = `Posición incorrecta.${magnitudeDiff} Recuerda: ${challenge.explanation}`;
+        title.innerText = "¡Desbalance de Escala Detectado!";
+        text.innerText = `Posición errónea.${feedbackFactor} Pista de corrección: ${data.explanation}`;
       }
     }
 
-    function loadNextChallenge() {
-      currentIndex = (currentIndex + 1) % challenges[currentOp].length;
+    function nextChallenge() {
+      currentLevel++;
+      if (currentLevel >= challengesData[activeOp].length) {
+        alert(`¡Felicidades! Has completado con éxito la fase de ${activeOp.toUpperCase()} con ${score} puntos de calibración acumulados.`);
+        currentLevel = 0;
+      }
       loadChallenge();
     }
 
-    // Inicialización
+    // Inicializar app
     loadChallenge();
   </script>
 </body>
