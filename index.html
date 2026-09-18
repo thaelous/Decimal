@@ -13,9 +13,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            overflow: hidden;
+            overflow-y: auto;
         }
         .container {
             background: #16213e;
@@ -24,54 +24,94 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             text-align: center;
             width: 90%;
-            max-width: 500px;
+            max-width: 550px;
+            margin: 20px 0;
         }
-        h2 { margin-bottom: 20px; color: #e94560; }
+        h2 { margin-bottom: 10px; color: #e94560; }
         
-        /* Estilos de filas y bloques 3D */
+        /* Operación explícita inicial */
+        .explicit-operation {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 15px 0;
+            color: #f1c40f;
+            letter-spacing: 2px;
+        }
+
+        /* Contenedor de filas con más espacio hacia el disparador */
         .row-container {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            margin: 30px 0;
+            gap: 25px;
+            margin: 40px 0 60px 0; /* Más espacio abajo para el disparador */
             position: relative;
-            height: 120px;
+            height: 100px;
             justify-content: center;
             align-items: center;
         }
         .number-row {
             display: flex;
-            gap: 10px;
-            font-size: 24px;
-            font-weight: bold;
-            transition: transform 0.1s ease;
+            gap: 6px;
+            align-items: center;
+            transition: transform 0.05s linear;
         }
+        
+        /* Bloques individuales por dígito estilo 3D */
         .block-3d {
             background: linear-gradient(135deg, #0f3460, #1f4068);
             border: 2px solid #e94560;
-            padding: 10px 15px;
-            border-radius: 8px;
-            box-shadow: 0 5px 0 #b32e43;
-            display: inline-block;
+            width: 35px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            box-shadow: 0 4px 0 #b32e43;
+            font-size: 22px;
+            font-weight: bold;
         }
-        /* Esfera vistosa para el punto */
+        .block-empty {
+            background: rgba(255,255,255,0.05);
+            border: 2px dashed rgba(233, 69, 96, 0.4);
+            box-shadow: none;
+        }
+
+        /* Esfera vistosa exactamente al nivel del punto */
         .sphere-dot {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             background: radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b);
             border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 10px #ff6b6b, inset -2px -2px 4px rgba(0,0,0,0.5);
-            align-self: center;
-            margin: 0 5px;
+            box-shadow: 0 0 12px #ff6b6b, inset -2px -2px 4px rgba(0,0,0,0.6);
+            margin: 0 8px;
+            align-self: flex-end; /* Alineado abajo, a la altura base de los números */
+            margin-bottom: 5px;
         }
         
+        /* Zona del disparador con la flecha indicadora */
+        .shooter-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+            gap: 8px;
+        }
+        .shooter-arrow {
+            font-size: 28px;
+            color: #f1c40f;
+            animation: bounceArrow 0.6s infinite alternate;
+        }
+        @keyframes bounceArrow {
+            from { transform: translateY(0); }
+            to { transform: translateY(8px); }
+        }
+
         /* Botones generales */
         .btn {
             background: #e94560;
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 12px 30px;
             font-size: 18px;
             border-radius: 8px;
             cursor: pointer;
@@ -117,13 +157,19 @@
 
     <div class="container" id="gameContainer">
         <h2>Alineación de Decimales</h2>
-        <p id="instruction">Observa la operación y prepárate para alinear.</p>
+        <p id="instruction">Observa la operación de suma:</p>
+
+        <!-- Suma explícita -->
+        <div class="explicit-operation" id="explicitOp">73.4 + 13.579</div>
 
         <div class="row-container" id="rowContainer">
-            <!-- Se inyecta dinámicamente -->
+            <!-- Se carga inicialmente con números normales por dígito -->
         </div>
 
-        <button class="btn" id="mainButton" onclick="handleButtonClick()">Iniciar</button>
+        <div class="shooter-area" id="shooterArea">
+            <div class="shooter-arrow" id="shooterArrow" style="display: none;"></div>
+            <button class="btn" id="mainButton" onclick="handleButtonClick()">Iniciar</button>
+        </div>
         
         <div class="answer-section" id="answerSection">
             <input type="text" id="userAnswer" placeholder="Tu respuesta">
@@ -139,28 +185,33 @@
         let animInterval;
         let offset1 = 0;
         let offset2 = 0;
-        let speed1 = 3;
-        let speed2 = -4;
+        let speed1 = 2.5;
+        let speed2 = -3.5;
 
-        // Datos del reto actual (ejemplo: 73.4 + 13.579)
         const opData = {
-            num1Text: "73 . 4",
-            num2Text: "13 . 5 7 9",
             correctSum: 86.979
         };
 
+        // Vista inicial con números por dígito (sin cuadros 3D todavía)
         function initView() {
             const container = document.getElementById('rowContainer');
             container.innerHTML = `
                 <div class="number-row">
-                    <span class="block-3d">7 3</span>
-                    <span style="color:#ff6b6b; font-size:28px;">.</span>
-                    <span class="block-3d">4</span>
+                    <div class="block-3d">7</div>
+                    <div class="block-3d">3</div>
+                    <div style="color:#ff6b6b; font-size:26px; font-weight:bold; margin:0 4px;">.</div>
+                    <div class="block-3d">4</div>
+                    <div style="width:20px;"></div>
                 </div>
-                <div class="number-row">
-                    <span class="block-3d">1 3</span>
-                    <span style="color:#ff6b6b; font-size:28px;">.</span>
-                    <span class="block-3d">5 7 9</span>
+                <div class="number-row" style="position:relative; left: 15px;">
+                    <div class="block-3d">+</div>
+                    <div style="width:10px;"></div>
+                    <div class="block-3d">1</div>
+                    <div class="block-3d">3</div>
+                    <div style="color:#ff6b6b; font-size:26px; font-weight:bold; margin:0 4px;">.</div>
+                    <div class="block-3d">5</div>
+                    <div class="block-3d">7</div>
+                    <div class="block-3d">9</div>
                 </div>
             `;
         }
@@ -168,13 +219,14 @@
 
         function handleButtonClick() {
             if (gameState === 'waiting') {
-                // Cambiar a modo juego (esferas y movimiento discordante)
                 gameState = 'playing';
-                document.getElementById('mainButton').innerText = "Dispara";
-                document.getElementById('instruction').innerText = "¡Dispara cuando las esferas se alineen!";
+                document.getElementById('explicitOp.style.display') // opcional
+                document.getElementById('mainButton').innerText = "¡Dispara!";
+                document.getElementById('shooterArrow').style.display = 'block';
+                document.getElementById('shooterArrow').innerText = "▲";
+                document.getElementById('instruction').innerText = "¡Dispara cuando las esferas estén alineadas!";
                 startDiscordantMotion();
             } else if (gameState === 'playing') {
-                // Intentar disparo
                 tryShoot();
             }
         }
@@ -185,20 +237,27 @@
                 offset1 += speed1;
                 offset2 += speed2;
 
-                // Rebote en los límites
-                if (offset1 > 60 || offset1 < -60) speed1 *= -1;
-                if (offset2 > 60 || offset2 < -60) speed2 *= -1;
+                if (offset1 > 55 || offset1 < -55) speed1 *= -1;
+                if (offset2 > 55 || offset2 < -55) speed2 *= -1;
 
+                // Ahora sí aparecen los cuadros 3D por dígito con sus esferas a nivel del punto
                 container.innerHTML = `
                     <div class="number-row" style="transform: translateX(${offset1}px);">
-                        <span class="block-3d">🔲 🔲</span>
-                        <span class="sphere-dot"></span>
-                        <span class="block-3d">🔲</span>
+                        <div class="block-3d block-empty"></div>
+                        <div class="block-3d block-empty"></div>
+                        <div class="sphere-dot"></div>
+                        <div class="block-3d block-empty"></div>
+                        <div style="width:20px;"></div>
                     </div>
                     <div class="number-row" style="transform: translateX(${offset2}px);">
-                        <span class="block-3d">🔲 🔲</span>
-                        <span class="sphere-dot"></span>
-                        <span class="block-3d">🔲 🔲 🔲</span>
+                        <div class="block-3d block-empty" style="opacity:0; border:none;"></div>
+                        <div style="width:10px;"></div>
+                        <div class="block-3d block-empty"></div>
+                        <div class="block-3d block-empty"></div>
+                        <div class="sphere-dot"></div>
+                        <div class="block-3d block-empty"></div>
+                        <div class="block-3d block-empty"></div>
+                        <div class="block-3d block-empty"></div>
                     </div>
                 `;
             }, 30);
@@ -208,20 +267,19 @@
             document.getElementById('gameContainer').classList.add('flash');
             setTimeout(() => document.getElementById('gameContainer').classList.remove('flash'), 300);
 
-            // Verificar si la diferencia de posiciones (offset) es muy pequeña (alineados)
             let diferencia = Math.abs(offset1 - offset2);
             
-            if (diferencia < 8) {
+            if (diferencia < 6) {
                 // ¡Acierto!
                 clearInterval(animInterval);
-                document.getElementById('mainButton').style.display = 'none';
-                document.getElementById('instruction').innerText = "¡Excelente! Escribe el resultado:";
+                document.getElementById('shooterArea').style.display = 'none';
+                document.getElementById('explicitOp').style.display = 'none';
+                document.getElementById('instruction').innerText = "¡Excelente! Escribe el resultado de la suma:";
                 document.getElementById('answerSection').style.display = 'block';
                 document.getElementById('messageBox').style.color = '#2ecc71';
-                document.getElementById('messageBox').innerText = "¡Lograste la alineación!";
+                document.getElementById('messageBox').innerText = "¡Alineación perfecta!";
                 gameState = 'answering';
             } else {
-                // Fallo el disparo
                 document.getElementById('messageBox').style.color = '#e94560';
                 document.getElementById('messageBox').innerText = "¡Fallaste el tiro, intenta de nuevo!";
             }
@@ -236,7 +294,7 @@
 
             if (Math.abs(val - opData.correctSum) < 0.001) {
                 document.getElementById('messageBox').style.color = '#2ecc71';
-                document.getElementById('messageBox').innerText = "¡Correcto! 🎉";
+                document.getElementById('messageBox').innerText = "¡Correcto! 🎉 Puntos decimales colocados con éxito.";
                 document.getElementById('answerSection').style.display = 'none';
             } else {
                 document.getElementById('messageBox').style.color = '#e94560';
