@@ -309,11 +309,11 @@
     <div id="tutorialScreen" class="screen">
       <div class="tutorial-box">
         <h2>Manual de Supervivencia: Análisis Lógico</h2>
-        <p>Para estabilizar el reactor sin trampas, recuerda analizar la magnitud:</p>
+        <p>Para estabilizar el reactor, calcula la operación exacta:</p>
         <ul style="margin-top: 8px;">
-          <li><strong>Suma y Resta:</strong> Alinea las columnas verticalmente. El punto decimal conserva exactamente su carril.</li>
-          <li><strong>Multiplicación:</strong> Cuenta cuántos lugares decimales tienen en total los factores combinados y desplázate de derecha a izquierda.</li>
-          <li><strong>División:</strong> Si el divisor tiene decimales, amplifica ambos términos por potencias de 10 hasta dejarlo entero. Analiza el cociente paso a paso.</li>
+          <li><strong>Suma y Resta:</strong> Alinea las columnas verticalmente. El punto decimal conserva su carril.</li>
+          <li><strong>Multiplicación:</strong> Cuenta cuántos lugares decimales tienen en total los factores combinados.</li>
+          <li><strong>División:</strong> Convierte el divisor en entero usando potencias de 10 y halla el cociente exacto.</li>
         </ul>
       </div>
       <button class="btn-action" onclick="startGame()">¡Aceptar Reto Analítico!</button>
@@ -331,7 +331,7 @@
       <div class="reactor-core">
         <div id="missionInfo" class="mission-prompt">Nivel 1: Iniciación</div>
         <div id="equationDisplay" class="equation-display">14.50 + 3.25</div>
-        <div id="radarHint" class="radar-hint">Reto analítico: ¿Cuál es la columna pivote?</div>
+        <div id="radarHint" class="radar-hint">Reto analítico: Resuelve la operación mentalmente.</div>
       </div>
 
       <div class="energy-track-container">
@@ -351,25 +351,25 @@
   </div>
 
   <script>
-    // Banco con retos de análisis lógico puro (sin spoilers en las pistas)
+    // Banco donde el resultado matemático EXACTO calcula automáticamente la posición correcta de la válvula
     const missions = {
       suma: [
-        { level: "Nivel 1: Unidades Simples", a: 14.50, b: 3.25, op: "+", raw: "1775", correct: 2, hint: "Analiza la posición vertical: mantén la separación exacta entre las unidades y los décimos.", expl: "¡Correcto! Al sumar respetando el carril vertical, el punto se mantuvo en su posición exacta." },
-        { level: "Nivel 2: Cientos y Decimales", a: 230.4, b: 15.8, op: "+", raw: "2462", correct: 3, hint: "Analiza el arrastre: ¿Qué pasa cuando sumas los décimos (4 + 8) y superas 10?", expl: "¡Excelente análisis! Los 12 décimos generaron una unidad adicional que elevó el resultado a la escala correcta." }
+        { level: "Nivel 1: Unidades Simples", a: 14.50, b: 3.25, op: "+", exact: 17.75, hint: "Suma en columnas fijas. ¿Cuál es el resultado de 14.50 + 3.25?", expl: "¡Correcto! 17.75 respeta estrictamente el carril vertical del punto." },
+        { level: "Nivel 2: Cientos y Decimales", a: 230.4, b: 15.8, op: "+", exact: 246.2, hint: "Suma de enteros y décimos. 4 décimos + 8 décimos generan un entero extra.", expl: "¡Excelente! 246.2 mantiene la alineación exacta de las décimas." }
       ],
       resta: [
-        { level: "Nivel 1: Estándar", a: 80.5, b: 32.1, op: "-", raw: "484", correct: 2, hint: "Analiza la sustracción de décimos: el eje vertical no se desplaza hacia los enteros.", expl: "¡Reactor estable! La distancia entre escalas se conservó intacta." },
-        { level: "Nivel 2: Cientos con Ceros", a: 500.00, b: 142.75, raw: "35725", correct: 3, hint: "Analiza el minuendo: desglosa los centésimos ocultos en el 500 para restar con precisión.", expl: "¡Dominado! Analizar los centésimos invisibles permitió ubicar la válvula en el sitio exacto." }
+        { level: "Nivel 1: Estándar", a: 80.5, b: 32.1, op: "-", exact: 48.4, hint: "Resta vertical: 80.5 menos 32.1.", expl: "¡Reactor estable! 48.4 conserva la distancia exacta entre escalas." },
+        { level: "Nivel 2: Cientos con Ceros", a: 500.00, b: 142.75, op: "-", exact: 357.25, hint: "Visualiza los centésimos ocultos en los ceros de 500.00.", expl: "¡Dominado! 357.25 es la diferencia exacta respetando centésimos." }
       ],
       multiplicacion: [
-        { level: "Nivel 1: Doble Decimal", a: 3.5, b: 2.1, op: "×", raw: "735", correct: 2, hint: "Analiza los factores: suma los lugares decimales de ambos (1 de 3.5 + 1 de 2.1).", expl: "¡Efecto crítico! Contar los lugares decimales de ambos factores determina cuántos espacios se desplaza el punto." },
-        { level: "Nivel 2: Milésimas Críticas", a: 1.25, b: 0.04, raw: "5", correct: 2, hint: "Analiza la escala total: 2 decimales en el primer factor y 2 en el segundo. ¿Cuántos lugares en total debes retroceder desde la derecha?", expl: "¡Brillante deducción! Cuatro lugares decimales requerían posicionar la válvula antes del 5." }
+        { level: "Nivel 1: Doble Decimal", a: 3.5, b: 2.1, op: "×", exact: 7.35, hint: "Multiplica los dígitos (35 × 21 = 735) y suma los decimales de los factores (1 + 1 = 2 lugares).", expl: "¡Efecto crítico! 7.35 es el resultado exacto con dos lugares decimales." },
+        { level: "Nivel 2: Milésimas Críticas", a: 1.25, b: 0.04, op: "×", exact: 0.05, hint: "125 × 4 = 500. Suma los lugares decimales totales (2 + 2 = 4 lugares).", expl: "¡Brillante! 0.05 (o 0.0500) acumula exactamente cuatro posiciones de escala." }
       ],
       division: [
-        { level: "Nivel 1: Cociente Entero", a: 4.8, b: 0.6, op: "÷", raw: "8", correct: 1, hint: "Analiza la proporción: al amplificar ambos por 10 (48 ÷ 6), ¿sobran decimales o es un ciclo cerrado?", expl: "¡Impecable! Al equilibrar el flujo con potencias de 10, el ciclo cerró en un número entero." },
-        { level: "Nivel 2: Resultado con Décimos", a: 5.2, b: 4, op: "÷", raw: "13", correct: 1, hint: "Analiza el residuo: divide primero las unidades enteras y reparte el sobrante entre las partes.", expl: "¡Excelente! Al fraccionar el residuo en décimos, el análisis dio 1.3." },
-        { level: "Nivel 3: Centésimos Finos", a: 7.5, b: 2, op: "÷", raw: "375", correct: 1, hint: "Analiza la continuidad: tras dividir las unidades, añade ceros al residuo para buscar centésimos.", expl: "¡Gran cálculo analítico! La división llegó a centésimos exactos: 3.75." },
-        { level: "Nivel 4: Cientos con Milésimas", a: 125.6, b: 8, op: "÷", raw: "1570", correct: 2, hint: "Analiza la magnitud de los cientos: divide por bloques de valor posicional hasta cerrar la milésima.", expl: "¡Maestría absoluta! Tu razonamiento lógico mantuvo la estación a salvo." }
+        { level: "Nivel 1: Cociente Entero", a: 4.8, b: 0.6, op: "÷", exact: 8, hint: "Amplifica ambos por 10: calcula 48 ÷ 6.", expl: "¡Impecable! El resultado es 8 unidades enteras." },
+        { level: "Nivel 2: Resultado con Décimos", a: 5.2, b: 4, op: "÷", exact: 1.3, hint: "Divide las unidades enteras y reparte el residuo en décimos.", expl: "¡Excelente! 1.3 es el cociente exacto." },
+        { level: "Nivel 3: Centésimos Finos", a: 7.5, b: 2, op: "÷", exact: 3.75, hint: "Continúa dividiendo el residuo añadiendo ceros decimales.", expl: "¡Gran cálculo! 3.75 arrojó centésimos exactos." },
+        { level: "Nivel 4: Cientos con Milésimas", a: 125.6, b: 8, op: "÷", exact: 15.7, hint: "Divide la magnitud de los cientos y fracciona el residuo.", expl: "¡Maestría absoluta! 15.7 es el cociente exacto." }
       ]
     };
 
@@ -386,7 +386,7 @@
         tutorialScreen.classList.remove('active');
         gameScreen.classList.add('active');
       } else {
-        gameScreen.classList.remove('active');
+        tutorialScreen.classList.remove('active');
         tutorialScreen.classList.add('active');
       }
     }
@@ -412,14 +412,23 @@
       
       let opSign = mission.op;
       document.getElementById('equationDisplay').innerText = `${mission.a} ${opSign} ${mission.b}`;
-      document.getElementById('radarHint').innerText = `Reto analítico: ${mission.hint}`;
+      document.getElementById('radarHint',).innerText = `Reto analítico: ${mission.hint}`;
       document.getElementById('scoreCount').innerText = score;
       document.getElementById('shieldCount').innerText = shield + '%';
 
-      // Renderizar carril con ranuras garantizadas en todas las posiciones
+      // MAGIA MATEMÁTICA AUTOMÁTICA: Convertimos el número exacto a su representación de dígitos limpios y calculamos el índice exacto del punto
+      let exactStr = mission.exact.toString();
+      // Si es entero (ej. 8), lo tratamos como "8" con punto al final o sin punto intermedio
+      let rawDigits = exactStr.replace('.', '');
+      let correctIndex = exactStr.includes('.') ? exactStr.indexOf('.') : rawDigits.length;
+
+      mission.rawDigits = rawDigits;
+      mission.correctIndex = correctIndex;
+
+      // Renderizar carril con ranuras garantizadas
       const rail = document.getElementById('digitsRail');
       rail.innerHTML = '';
-      const digits = mission.raw.split('');
+      const digits = rawDigits.split('');
 
       const startSlot = document.createElement('div');
       startSlot.className = 'valve-slot';
@@ -461,7 +470,7 @@
 
       feedback.classList.remove('success', 'danger');
 
-      if (selectedValve === mission.correct) {
+      if (selectedValve === mission.correctIndex) {
         feedback.classList.add('show', 'success');
         title.innerText = "⚡ ¡REACTOR ESTABILIZADO!";
         desc.innerText = mission.expl;
