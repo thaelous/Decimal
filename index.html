@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minijuego: Alineación Decimal</title>
+    <title>Minijuego: Alineación Decimal Avanzada</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -15,7 +15,7 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            overflow-y: auto;
+            overflow-x: hidden;
         }
         .container {
             background: #16213e;
@@ -24,39 +24,41 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             text-align: center;
             width: 90%;
-            max-width: 550px;
-            margin: 20px 0;
+            max-width: 600px;
+            position: relative;
         }
-        h2 { margin-bottom: 10px; color: #e94560; }
-        
-        /* Operación explícita inicial */
-        .explicit-operation {
-            font-size: 24px;
+        h2 { margin-bottom: 5px; color: #e94560; }
+        p { color: #a0a0a0; }
+
+        /* Pantalla inicial con suma normal */
+        .initial-display {
+            font-size: 32px;
             font-weight: bold;
-            margin: 15px 0;
-            color: #f1c40f;
+            margin: 40px 0;
             letter-spacing: 2px;
+            color: #f1c40f;
         }
 
-        /* Contenedor de filas con más espacio hacia el disparador */
-        .row-container {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            margin: 40px 0 60px 0; /* Más espacio abajo para el disparador */
+        /* Contenedores de filas de juego */
+        .game-area {
             position: relative;
-            height: 100px;
-            justify-content: center;
-            align-items: center;
+            height: 180px;
+            margin: 20px 0;
+            display: none;
         }
         .number-row {
             display: flex;
             gap: 6px;
             align-items: center;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
             transition: transform 0.05s linear;
         }
-        
-        /* Bloques individuales por dígito estilo 3D */
+        #row1 { top: 20px; }
+        #row2 { top: 90px; }
+
+        /* Cuadros 3D y Esferas */
         .block-3d {
             background: linear-gradient(135deg, #0f3460, #1f4068);
             border: 2px solid #e94560;
@@ -70,43 +72,43 @@
             font-size: 22px;
             font-weight: bold;
         }
-        .block-empty {
-            background: rgba(255,255,255,0.05);
-            border: 2px dashed rgba(233, 69, 96, 0.4);
-            box-shadow: none;
-        }
-
-        /* Esfera vistosa exactamente al nivel del punto */
         .sphere-dot {
             width: 18px;
             height: 18px;
             background: radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b);
             border-radius: 50%;
-            box-shadow: 0 0 12px #ff6b6b, inset -2px -2px 4px rgba(0,0,0,0.6);
+            box-shadow: 0 0 15px #ff6b6b, inset -2px -2px 4px rgba(0,0,0,0.6);
             margin: 0 8px;
-            align-self: flex-end; /* Alineado abajo, a la altura base de los números */
+            align-self: flex-end;
             margin-bottom: 5px;
         }
-        
-        /* Zona del disparador con la flecha indicadora */
-        .shooter-area {
-            display: flex;
+
+        /* Línea punteada y láser de disparo */
+        .shooter-control {
+            display: none;
             flex-direction: column;
             align-items: center;
-            margin-top: 30px;
-            gap: 8px;
+            margin-top: 10px;
         }
-        .shooter-arrow {
-            font-size: 28px;
-            color: #f1c40f;
-            animation: bounceArrow 0.6s infinite alternate;
+        .dotted-guide {
+            width: 2px;
+            height: 50px;
+            border-left: 2px dashed #f1c40f;
+            margin-bottom: 5px;
         }
-        @keyframes bounceArrow {
-            from { transform: translateY(0); }
-            to { transform: translateY(8px); }
+        .laser-beam {
+            position: absolute;
+            width: 4px;
+            background: #ff0055;
+            box-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            z-index: 10;
         }
 
-        /* Botones generales */
+        /* Botones y controles generales */
         .btn {
             background: #e94560;
             color: white;
@@ -143,13 +145,29 @@
             font-size: 18px;
             font-weight: bold;
         }
-        .flash {
-            animation: flashEffect 0.3s ease;
+
+        /* Efecto de brillo para la esfera del punto final */
+        .glow-sphere {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #ff6b6b, 0 0 25px #ff0055;
+            animation: glowPulse 1s infinite alternate;
+            margin: 0 3px;
         }
-        @keyframes flashEffect {
-            0% { background-color: #16213e; }
-            50% { background-color: #ff6b6b; }
-            100% { background-color: #16213e; }
+        @keyframes glowPulse {
+            from { transform: scale(1); box-shadow: 0 0 5px #ff6b6b; }
+            to { transform: scale(1.3); box-shadow: 0 0 20px #ff6b6b, 0 0 35px #ff0055; }
+        }
+
+        .final-equation-display {
+            font-size: 26px;
+            font-weight: bold;
+            color: #2ecc71;
+            margin-top: 20px;
+            display: none;
         }
     </style>
 </head>
@@ -157,146 +175,138 @@
 
     <div class="container" id="gameContainer">
         <h2>Alineación de Decimales</h2>
-        <p id="instruction">Observa la operación de suma:</p>
+        <p id="instruction">Observa la siguiente operación de suma:</p>
 
-        <!-- Suma explícita -->
-        <div class="explicit-operation" id="explicitOp">73.4 + 13.579</div>
-
-        <div class="row-container" id="rowContainer">
-            <!-- Se carga inicialmente con números normales por dígito -->
+        <!-- 1. Pantalla inicial normal -->
+        <div id="initialView">
+            <div class="initial-display">73.4 + 13.579</div>
+            <button class="btn" onclick="startGame()">Iniciar</button>
         </div>
 
-        <div class="shooter-area" id="shooterArea">
-            <div class="shooter-arrow" id="shooterArrow" style="display: none;"></div>
-            <button class="btn" id="mainButton" onclick="handleButtonClick()">Iniciar</button>
+        <!-- Rayo láser animado -->
+        <div class="laser-beam" id="laserBeam"></div>
+
+        <!-- 2. Área del juego de disparos con bloques y esferas moviéndose -->
+        <div class="game-area" id="gameArea">
+            <div class="number-row" id="row1">
+                <div class="block-3d">7</div><div class="block-3d">3</div>
+                <div class="sphere-dot"></div>
+                <div class="block-3d">4</div>
+            </div>
+            <div class="number-row" id="row2">
+                <div class="block-3d" style="background:#2a2a40; border-color:#444; color:#666;">+</div>
+                <div class="block-3d">1</div><div class="block-3d">3</div>
+                <div class="sphere-dot"></div>
+                <div class="block-3d">5</div><div class="block-3d">7</div><div class="block-3d">9</div>
+            </div>
         </div>
-        
+
+        <!-- Control de disparo con línea punteada -->
+        <div class="shooter-control" id="shooterControl">
+            <div class="dotted-guide"></div>
+            <button class="btn" onclick="tryShoot()">¡Disparar!</button>
+        </div>
+
+        <!-- 3. Sección para ingresar la respuesta -->
         <div class="answer-section" id="answerSection">
-            <input type="text" id="userAnswer" placeholder="Tu respuesta">
+            <input type="text" id="userAnswer" placeholder="Escribe tu respuesta">
             <br>
             <button class="btn" onclick="checkAnswer()">Puntuar</button>
+        </div>
+
+        <!-- Ecuación final revelada -->
+        <div class="final-equation-display" id="finalEquation">
+            73.4 + 13.579 = 86<span class="glow-sphere"></span>979
         </div>
 
         <div class="message" id="messageBox"></div>
     </div>
 
     <script>
-        let gameState = 'waiting'; // waiting, playing, answering
         let animInterval;
         let offset1 = 0;
         let offset2 = 0;
-        let speed1 = 2.5;
-        let speed2 = -3.5;
+        let speed1 = 2;
+        let speed2 = -2.5;
+        let gameActive = false;
 
-        const opData = {
-            correctSum: 86.979
-        };
+        const correctSumValue = 86.979;
 
-        // Vista inicial con números por dígito (sin cuadros 3D todavía)
-        function initView() {
-            const container = document.getElementById('rowContainer');
-            container.innerHTML = `
-                <div class="number-row">
-                    <div class="block-3d">7</div>
-                    <div class="block-3d">3</div>
-                    <div style="color:#ff6b6b; font-size:26px; font-weight:bold; margin:0 4px;">.</div>
-                    <div class="block-3d">4</div>
-                    <div style="width:20px;"></div>
-                </div>
-                <div class="number-row" style="position:relative; left: 15px;">
-                    <div class="block-3d">+</div>
-                    <div style="width:10px;"></div>
-                    <div class="block-3d">1</div>
-                    <div class="block-3d">3</div>
-                    <div style="color:#ff6b6b; font-size:26px; font-weight:bold; margin:0 4px;">.</div>
-                    <div class="block-3d">5</div>
-                    <div class="block-3d">7</div>
-                    <div class="block-3d">9</div>
-                </div>
-            `;
-        }
-        initView();
-
-        function handleButtonClick() {
-            if (gameState === 'waiting') {
-                gameState = 'playing';
-                document.getElementById('explicitOp.style.display') // opcional
-                document.getElementById('mainButton').innerText = "¡Dispara!";
-                document.getElementById('shooterArrow').style.display = 'block';
-                document.getElementById('shooterArrow').innerText = "▲";
-                document.getElementById('instruction').innerText = "¡Dispara cuando las esferas estén alineadas!";
-                startDiscordantMotion();
-            } else if (gameState === 'playing') {
-                tryShoot();
-            }
+        function startGame() {
+            // Ocultar pantalla inicial y mostrar área de juego y controles de disparo
+            document.getElementById('initialView').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'block';
+            document.getElementById('shooterControl').style.display = 'flex';
+            document.getElementById('instruction').innerText = "¡Dispara exactamente cuando los puntos se alinien!";
+            
+            gameActive = true;
+            startMotion();
         }
 
-        function startDiscordantMotion() {
-            const container = document.getElementById('rowContainer');
+        function startMotion() {
             animInterval = setInterval(() => {
+                if (!gameActive) return;
+
                 offset1 += speed1;
                 offset2 += speed2;
 
-                if (offset1 > 55 || offset1 < -55) speed1 *= -1;
-                if (offset2 > 55 || offset2 < -55) speed2 *= -1;
+                if (offset1 > 60 || offset1 < -60) speed1 *= -1;
+                if (offset2 > 60 || offset2 < -60) speed2 *= -1;
 
-                // Ahora sí aparecen los cuadros 3D por dígito con sus esferas a nivel del punto
-                container.innerHTML = `
-                    <div class="number-row" style="transform: translateX(${offset1}px);">
-                        <div class="block-3d block-empty"></div>
-                        <div class="block-3d block-empty"></div>
-                        <div class="sphere-dot"></div>
-                        <div class="block-3d block-empty"></div>
-                        <div style="width:20px;"></div>
-                    </div>
-                    <div class="number-row" style="transform: translateX(${offset2}px);">
-                        <div class="block-3d block-empty" style="opacity:0; border:none;"></div>
-                        <div style="width:10px;"></div>
-                        <div class="block-3d block-empty"></div>
-                        <div class="block-3d block-empty"></div>
-                        <div class="sphere-dot"></div>
-                        <div class="block-3d block-empty"></div>
-                        <div class="block-3d block-empty"></div>
-                        <div class="block-3d block-empty"></div>
-                    </div>
-                `;
+                document.getElementById('row1').style.transform = `translateX(calc(-50% + ${offset1}px))`;
+                document.getElementById('row2').style.transform = `translateX(calc(-50% + ${offset2}px))`;
             }, 30);
         }
 
         function tryShoot() {
-            document.getElementById('gameContainer').classList.add('flash');
-            setTimeout(() => document.getElementById('gameContainer').classList.remove('flash'), 300);
+            if (!gameActive) return;
 
+            // Simular rayo láser vertical
+            const laser = document.getElementById('laserBeam');
+            laser.style.height = '180px';
+            laser.style.display = 'block';
+            setTimeout(() => { laser.style.display = 'none'; }, 200);
+
+            // Verificar si la diferencia de posición entre ambas esferas es mínima (alineadas)
             let diferencia = Math.abs(offset1 - offset2);
-            
-            if (diferencia < 6) {
-                // ¡Acierto!
+
+            if (diferencia < 5) {
+                // ¡Acierto! Detener movimiento
+                gameActive = false;
                 clearInterval(animInterval);
-                document.getElementById('shooterArea').style.display = 'none';
-                document.getElementById('explicitOp').style.display = 'none';
-                document.getElementById('instruction').innerText = "¡Excelente! Escribe el resultado de la suma:";
+
+                // Ocultar controles de disparo y limpiar bloques/esferas transformándolos a números fijos
+                document.getElementById('shooterControl').style.display = 'none';
+                document.getElementById('gameArea').style.display = 'none';
+
+                // Pasar a la sección de respuesta numérica
+                document.getElementById('instruction').innerText = "¡Alineación correcta! Ahora escribe el resultado:";
                 document.getElementById('answerSection').style.display = 'block';
                 document.getElementById('messageBox').style.color = '#2ecc71';
-                document.getElementById('messageBox').innerText = "¡Alineación perfecta!";
-                gameState = 'answering';
+                document.getElementById('messageBox').innerText = "¡Excelente disparo!";
             } else {
+                // Fallo
                 document.getElementById('messageBox').style.color = '#e94560';
-                document.getElementById('messageBox').innerText = "¡Fallaste el tiro, intenta de nuevo!";
+                document.getElementById('messageBox').innerText = "¡Fallaste el tiro! Las esferas no estaban alineadas.";
             }
         }
 
         function checkAnswer() {
             let val = parseFloat(document.getElementById('userAnswer').value);
+
             if (isNaN(val)) {
-                document.getElementById('messageBox').innerText = "Ingresa un número válido.";
+                document.getElementById('messageBox').innerText = "Por favor ingresa un número válido.";
                 return;
             }
 
-            if (Math.abs(val - opData.correctSum) < 0.001) {
-                document.getElementById('messageBox').style.color = '#2ecc71';
-                document.getElementById('messageBox').innerText = "¡Correcto! 🎉 Puntos decimales colocados con éxito.";
+            if (Math.abs(val - correctSumValue) < 0.001) {
+                // Respuesta correcta: Ocultar campo de respuesta y mostrar ecuación final completa con esfera brillante
                 document.getElementById('answerSection').style.display = 'none';
+                document.getElementById('instruction').innerText = "¡Operación completada con éxito!";
+                document.getElementById('messageBox').innerText = "";
+                document.getElementById('finalEquation').style.display = 'block';
             } else {
+                // Respuesta incorrecta según regla solicitada
                 document.getElementById('messageBox').style.color = '#e94560';
                 document.getElementById('messageBox').innerText = "No se puede poner punto la respuesta es incorrecta.";
             }
